@@ -20,7 +20,7 @@ class DataController(BaseController):
             return False, ResponseEnum.FILE_SIZE_EXCEEDED.value
         return True, ResponseEnum.FILE_VALIDATE_SUCCESS.value
 
-    def generate_unique_filename(self, org_filename: str, project_id: str):
+    def generate_unique_filepath(self, org_filename: str, project_id: str):
         random_filename = self.generate_random_string()
         project_path = ProjectController(app_settings=self.app_settings).get_project_path(project_id=project_id)
         clean_filename = self.get_clean_filename(org_filename)
@@ -39,7 +39,7 @@ class DataController(BaseController):
                 else f"{random_filename}_{clean_filename}"
             )
             new_file_path = os.path.join(project_path, stored_filename)
-        return new_file_path
+        return new_file_path, random_filename +"_"+ clean_filename
 
     def get_clean_filename(self, filename: str):
         basename = filename.rsplit(".", 1)[0] if "." in filename else filename
