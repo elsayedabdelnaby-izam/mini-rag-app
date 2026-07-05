@@ -5,6 +5,9 @@ from helpers.config import Settings, get_settings
 from controllers import DataController, ProjectController
 import aiofiles
 from models import ResponseEnum
+import logging
+
+logger = logging.getLogger("uvicorn.error")
 
 router = APIRouter(
     prefix="/api/v1/data"
@@ -19,8 +22,12 @@ async def upload_data(project_id: str, file: UploadFile = File(...), app_setting
     
     project_dir_path = ProjectController(app_settings=app_settings).get_project_path(project_id=project_id)
     file_path = data_controller.generate_unique_filename(org_filename=file.filename, project_id=project_id)
-    async with aiofiles.open(file_path, "wb") as f:
-        while chunk := await file.read(app_settings.FILE_DEFAULT_CHUNK_SIZE):
-            await f.write(chunk)
-        await file.close()
+    try:
+        async with aiofiles.open(file_path, "wb") as f:
+                while chunk := await file.read(app_settings.FILE_DEFAULT_CHUNK_SIZE):
+                    await f.write(chunk)
+                await file.close()
+    except Exception as e:
+        logger.error(f"Error uploading file: {e}", exc_info=True)
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"message": ResponseEnum.FILE_UPLOAD_FAILED.value})
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": ResponseEnum.FILE_UPLOAD_SUCCESS.value})
