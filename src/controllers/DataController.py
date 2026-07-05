@@ -39,7 +39,7 @@ class DataController(BaseController):
                 else f"{random_filename}_{clean_filename}"
             )
             new_file_path = os.path.join(project_path, stored_filename)
-        return new_file_path, random_filename +"_"+ clean_filename
+        return new_file_path, stored_filename
 
     def get_clean_filename(self, filename: str):
         basename = filename.rsplit(".", 1)[0] if "." in filename else filename
